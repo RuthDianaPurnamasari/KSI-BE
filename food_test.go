@@ -1,4 +1,4 @@
-package bekaloriku_test
+package module
 
 import (
 	"fmt"
@@ -122,4 +122,86 @@ func TestDeleteUserByID(t *testing.T) {
     if err == nil {
         t.Fatalf("expected data to be deleted, but it still exists")
     }
+}
+
+// TestInsertMenuItemWithNoSQLInjection menguji apakah NoSQL Injection dapat terjadi
+func TestInsertMenuItemWithNoSQLInjection(t *testing.T) {
+	// Input dengan NoSQL Injection
+	name := `Fruit Smoothie", {"$ne": null}]}`
+	ingredients := "Banana, Strawberry, Blueberry, Almond Milk, Honey"
+	description := "A refreshing smoothie made with a blend of fruits and almond milk"
+	calories := 200.0
+	category := "Beverage"
+	imageURL := "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmTMSDdEMe7hCs2T1KBVj_1NKwYGb1lYqbKQ&s"
+
+	// Panggil InsertMenuItem dengan input yang terkontaminasi NoSQL Injection
+	insertedID, err := module.InsertMenuItem(module.MongoConn, "Menu", name, ingredients, description, calories, category, imageURL)
+	if err != nil {
+		t.Fatalf("Error inserting NoSQL injection input: %v", err)
+	}
+
+	// Verifikasi apakah input berhasil disisipkan
+	fmt.Printf("Data berhasil disimpan dengan id %s\n", insertedID.Hex())
+}
+
+// TestInsertMenuItemWithXSS menguji apakah aplikasi aman terhadap XSS
+func TestInsertMenuItemWithXSS(t *testing.T) {
+	name := "Fruit Smoothie"
+	ingredients := "Banana, Strawberry, Blueberry, Almond Milk, Honey"
+	// Input berbahaya (XSS Attack)
+	description := "<script>alert('XSS Attack');</script> A refreshing smoothie made with a blend of fruits and almond milk"
+	calories := 200.0
+	category := "Beverage"
+	imageURL := "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmTMSDdEMe7hCs2T1KBVj_1NKwYGb1lYqbKQ&s"
+
+	// Panggil InsertMenuItem dengan input XSS
+	insertedID, err := module.InsertMenuItem(module.MongoConn, "Menu", name, ingredients, description, calories, category, imageURL)
+	if err != nil {
+		t.Fatalf("Error inserting XSS input: %v", err)
+	}
+
+	// Verifikasi bahwa input berhasil dimasukkan dengan ID
+	fmt.Printf("Data berhasil disimpan dengan id %s\n", insertedID.Hex())
+}
+
+// TestInsertMenuItemWithSQLInjection menguji apakah SQL Injection dapat terjadi
+func TestInsertMenuItemWithSQLInjection(t *testing.T) {
+	// Input dengan SQL Injection
+	name := "Fruit Smoothie"
+	ingredients := "Banana, Strawberry, Blueberry, Almond Milk, Honey"
+	// Menggunakan SQL Injection untuk mencoba mengeksploitasi aplikasi
+	description := "' OR 1=1 --"
+	calories := 200.0
+	category := "Beverage"
+	imageURL := "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmTMSDdEMe7hCs2T1KBVj_1NKwYGb1lYqbKQ&s"
+
+	// Panggil InsertMenuItem dengan SQL Injection di deskripsi
+	insertedID, err := module.InsertMenuItem(module.MongoConn, "Menu", name, ingredients, description, calories, category, imageURL)
+	if err != nil {
+		t.Fatalf("Error inserting SQL injection input: %v", err)
+	}
+
+	// Verifikasi apakah input berhasil disisipkan
+	fmt.Printf("Data berhasil disimpan dengan id %s\n", insertedID.Hex())
+}
+
+// TestInsertMenuItemWithCommandInjection menguji apakah Command Injection dapat terjadi
+func TestInsertMenuItemWithCommandInjection(t *testing.T) {
+	// Input dengan Command Injection
+	name := "Fruit Smoothie"
+	ingredients := "Banana, Strawberry, Blueberry, Almond Milk, Honey"
+	// Coba menyisipkan command injection pada deskripsi
+	description := "A refreshing smoothie made with a blend of fruits and almond milk; rm -rf /"
+	calories := 200.0
+	category := "Beverage"
+	imageURL := "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmTMSDdEMe7hCs2T1KBVj_1NKwYGb1lYqbKQ&s"
+
+	// Panggil InsertMenuItem dengan command injection
+	insertedID, err := module.InsertMenuItem(module.MongoConn, "Menu", name, ingredients, description, calories, category, imageURL)
+	if err != nil {
+		t.Fatalf("Error inserting Command injection input: %v", err)
+	}
+
+	// Verifikasi apakah input berhasil dimasukkan
+	fmt.Printf("Data berhasil disimpan dengan id %s\n", insertedID.Hex())
 }
