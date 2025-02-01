@@ -149,7 +149,7 @@ func TestInsertMenuItemWithXSS(t *testing.T) {
 	name := "Fruit Smoothie"
 	ingredients := "Banana, Strawberry, Blueberry, Almond Milk, Honey"
 	// Input berbahaya (XSS Attack)
-	description := "<script>alert('XSS Attack Kaloriku');</script> A refreshing smoothie made with a blend of fruits and almond milk"
+	description := "<script>alert('XSS Attack Kaloriku!');</script> A refreshing smoothie made with a blend of fruits and almond milk"
 	calories := 200.0
 	category := "Beverage"
 	imageURL := "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmTMSDdEMe7hCs2T1KBVj_1NKwYGb1lYqbKQ&s"
